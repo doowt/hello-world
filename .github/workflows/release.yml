@@ -25,16 +25,24 @@ jobs:
         run: |
           # Use baseline if it exists, fail on new HIGH+ findings
           if [ -f baseline.json ]; then
-            cryptoscan scan . --baseline baseline.json --fail-on high --format sarif --output results.sarif
+            cryptoscan scan . --baseline baseline.json --fail-on high --format sarif --output report.cbom
           else
-            cryptoscan scan . --fail-on critical --format sarif --output cbom.sarif
+            cryptoscan scan . --fail-on critical --format sarif --output report.cbom
           fi
 
-      - name: Upload SARIF to GitHub Security
-        uses: github/codeql-action/upload-sarif@v4
+     # - name: Upload SARIF to GitHub Security
+     #   uses: github/codeql-action/upload-sarif@v4
+     #   if: always()
+     #   with:
+     #     sarif_file: cbom.sarif
+
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
-          sarif_file: cbom.sarif
+          name: report.cbom
+          path: ./report.cbom
+          retention-days: 90
+          if-no-files-found: error
 
   static-checks-npm:
     uses: digicatapult/shared-workflows/.github/workflows/static-checks-npm.yml@main
