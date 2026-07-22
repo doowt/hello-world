@@ -24,6 +24,7 @@
     "db:seed": "npm run db:cmd -- seed:run"
   },
   "dependencies": {
+    "@noble/post-quantum": "^0.6.1",
     "express": "^5.1.0",
     "knex": "^3.1.0",
     "pg": "^8.13.1"
