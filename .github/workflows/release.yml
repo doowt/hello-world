@@ -5,6 +5,36 @@ on:
     branches: ['main']
 
 jobs:
+  crypto-scan:
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+
+      - name: Install CryptoScan
+        run: go install github.com/csnp/cryptoscan/cmd/cryptoscan@v1.3.0
+
+      - name: Run Scan
+        run: |
+          # Use baseline if it exists, fail on new HIGH+ findings
+          if [ -f baseline.json ]; then
+            cryptoscan scan . --baseline baseline.json --fail-on high --format sarif --output results.sarif
+          else
+            cryptoscan scan . --fail-on critical --format sarif --output results.sarif
+          fi
+
+      - name: Upload SARIF to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: results.sarif
+
   static-checks-npm:
     uses: digicatapult/shared-workflows/.github/workflows/static-checks-npm.yml@main
     permissions:
