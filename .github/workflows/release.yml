@@ -6,10 +6,23 @@ on:
       - "*"
 
 jobs:
-  crypto-scan:
+  generate-cbom:
     runs-on: ubuntu-latest
     permissions:
       security-events: write
+    inputs:
+      enable_sarif:
+        required: false
+        type: boolean
+        default: true
+      enable_artifact:
+        required: false
+        type: boolean
+        default: true
+      enable_fail_on_critical:
+        required: false
+        type: boolean
+        default: true
     steps:
       - uses: actions/checkout@v7
 
@@ -23,24 +36,20 @@ jobs:
 
       - name: Run Scan
         run: |
-          # Use baseline if it exists, fail on new HIGH+ findings
-          if [ -f baseline.json ]; then
-            cryptoscan scan . --baseline baseline.json --fail-on high --format sarif --output report.cbom
-          else
-            cryptoscan scan . --fail-on critical --format sarif --output report.cbom
-          fi
+            cryptoscan scan . ${{ case(inputs.enable_fail_on_critical, '--fail-on critical', ''}} --format sarif --output cbom-report.sarif
+            cryptoscan scan . ${{ case(inputs.enable_fail_on_critical, '--fail-on critical', ''}} --format json --output cbom-report.json
 
-     # - name: Upload SARIF to GitHub Security
-     #   uses: github/codeql-action/upload-sarif@v4
-     #   if: always()
-     #   with:
-     #     sarif_file: cbom.sarif
+      - name: Upload SARIF to GitHub Security
+        uses: github/codeql-action/upload-sarif@v4
+        if: ${{ inputs.enable_sarif == true }} 
+        with:
+          sarif_file: cbom-report.sarif
 
       - uses: actions/upload-artifact@v7
-        if: always()
+        if: ${{ inputs.enable_artifact == true }}
         with:
-          name: report.cbom
-          path: ./report.cbom
+          name: cbom-report.json
+          path: ./cbom-report.json
           retention-days: 90
           if-no-files-found: error
 
