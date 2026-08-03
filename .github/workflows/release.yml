@@ -4,12 +4,18 @@ on:
   push:
     branches: 
       - "*"
-
 jobs:
   generate-cbom:
     uses: doowt/shared-workflows/.github/workflows/generate-cbom.yml@add-cbom-workflow
     permissions: {}
 
+  static-checks-npm:
+    uses: digicatapult/shared-workflows/.github/workflows/static-checks-npm.yml@main
+    permissions:
+      security-events: write
+    with:
+      matrix_commands: '["start"]'
+      
   tests-npm:
     uses: digicatapult/shared-workflows/.github/workflows/tests-npm.yml@main
     permissions:
