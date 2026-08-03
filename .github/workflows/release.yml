@@ -16,7 +16,7 @@ jobs:
       security-events: write
     with:
       matrix_commands: '["start"]'
-      
+
   tests-npm:
     uses: digicatapult/shared-workflows/.github/workflows/tests-npm.yml@main
     permissions:
