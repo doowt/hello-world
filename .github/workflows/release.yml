@@ -36,9 +36,13 @@ jobs:
 
       - name: Run Scan
         run: |
-            cryptoscan scan . ${{ case(inputs.enable_fail_on_critical, '--fail-on critical', '')}} --format sarif --output cbom-report.sarif
-            cryptoscan scan . ${{ case(inputs.enable_fail_on_critical, '--fail-on critical', '')}} --format json --output cbom-report.json
-
+            SCAN_ARGS=""
+            if [[ "${{ inputs.enable_fail_on_critical }}" == "true" ]]; then
+              SCAN_ARGS="--fail-on critical"
+            fi
+            
+            cryptoscan scan . ${SCAN_ARGS} --format sarif --output cbom-report.sarif
+            cryptoscan scan . ${SCAN_ARGS} --format json --output cbom-report.json
       - name: Upload SARIF to GitHub Security
         uses: github/codeql-action/upload-sarif@v4
         if: ${{ inputs.enable_sarif == true }} 
