@@ -7,62 +7,8 @@ on:
 
 jobs:
   generate-cbom:
-    runs-on: ubuntu-latest
-    permissions:
-      security-events: write
-    inputs:
-      enable_sarif:
-        required: false
-        type: boolean
-        default: true
-      enable_artifact:
-        required: false
-        type: boolean
-        default: true
-      enable_fail_on_critical:
-        required: false
-        type: boolean
-        default: true
-    steps:
-      - uses: actions/checkout@v7
-
-      - name: Set up Go
-        uses: actions/setup-go@v7
-        with:
-          go-version: '1.23'
-
-      - name: Install CryptoScan
-        run: go install github.com/csnp/cryptoscan/cmd/cryptoscan@v1.3.0
-
-      - name: Run Scan
-        run: |
-            SCAN_ARGS=""
-            if [[ "${{ inputs.enable_fail_on_critical }}" == "true" ]]; then
-              SCAN_ARGS="--fail-on critical"
-            fi
-            
-            cryptoscan scan . ${SCAN_ARGS} --format sarif --output cbom-report.sarif
-            cryptoscan scan . ${SCAN_ARGS} --format json --output cbom-report.json
-      - name: Upload SARIF to GitHub Security
-        uses: github/codeql-action/upload-sarif@v4
-        if: ${{ inputs.enable_sarif == true }} 
-        with:
-          sarif_file: cbom-report.sarif
-
-      - uses: actions/upload-artifact@v7
-        if: ${{ inputs.enable_artifact == true }}
-        with:
-          name: cbom-report.json
-          path: ./cbom-report.json
-          retention-days: 90
-          if-no-files-found: error
-
-  static-checks-npm:
-    uses: digicatapult/shared-workflows/.github/workflows/static-checks-npm.yml@main
-    permissions:
-      security-events: write
-    with:
-      matrix_commands: '["start"]'
+    uses: doowt/shared-workflows/.github/workflows/generate-cbom.yml@add-cbom-workflow
+    permissions: {}
 
   tests-npm:
     uses: digicatapult/shared-workflows/.github/workflows/tests-npm.yml@main
