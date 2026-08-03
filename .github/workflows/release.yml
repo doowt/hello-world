@@ -7,7 +7,8 @@ on:
 jobs:
   generate-cbom:
     uses: doowt/shared-workflows/.github/workflows/generate-cbom.yml@add-cbom-workflow
-    permissions: {}
+    permissions:
+      security-events: write
 
   static-checks-npm:
     uses: digicatapult/shared-workflows/.github/workflows/static-checks-npm.yml@main
